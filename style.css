@@ -1,0 +1,57 @@
+:root
+{
+    --income-color : green;
+    --expense-color : red;
+}
+.banner-section
+{
+    position: relative;
+
+}
+.banner-section img
+{
+    width: 100%;
+}
+.banner-section::after{
+    content: "";
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.3);
+}
+.form-elements-container
+{
+    z-index: 1;
+    position: relative;
+}
+.add-record-btn
+{
+    width: 100%;
+}
+.form-elements-main {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: rgba(255,255,255,0.8);
+}
+.form-elements-main select , .form-elements-main input , .form-elements-main button
+{
+    flex: 1;
+}
+.total-income-container
+{
+    color  : var(--income-color);
+}
+.total-expense-container
+{
+    color:var(--expense-color);
+}
+i.fa.fa-remove
+{
+cursor: pointer;
+color: var(--expense-color);
+}

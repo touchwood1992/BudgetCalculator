@@ -5,13 +5,12 @@
 }
 .banner-section
 {
-    position: relative;
-    min-height: 350px;
+    position: relative;    
+    background-image: url("budget-rep-image.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
 }
-.banner-section img
-{
-    width: 100%;
-}
+
 .banner-section::after{
     content: "";
     position: absolute;
@@ -31,8 +30,12 @@
 .add-record-btn
 {
     width: 100%;
+} 
+.banner-section > .container-fluid{
+    padding-top: 300px !important;
 }
 .form-elements-main {
+   
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -70,4 +73,15 @@ color: var(--expense-color);
 #middle-container
 {
     padding-bottom: 50px;
+}
+
+@media (max-width:767px)
+{
+    .form-elements-main select , .form-elements-main input , .form-elements-main button
+{
+    flex: 100%;
+}
+.banner-section > .container-fluid{
+    padding-top: 400px !important;
+}
 }

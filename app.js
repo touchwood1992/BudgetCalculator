@@ -98,7 +98,12 @@ const budgetController = (function() {
 		this.type = type;
 		this.val = val;
 		this.desc = desc;
+		this.percentage = -1;
 	};
+	ExpenseObj.prototype.addPercentage = function(percentage)
+	{
+			this.percentage = percentage;
+	}
 	
 	return {
 		addItem: function({ type, value, description }) {
@@ -138,7 +143,21 @@ const budgetController = (function() {
 			return "";
 		}
 	   },
-	   
+	   settingPercentageForItems : function()
+	   {
+		   //calculate Percentage
+		   if(data.totalinc >=0 && data.exp.length > 0)
+		   {
+				data.exp.forEach(function(item){					
+					const percentage =  item.val * 100/data.totalinc;
+					item.addPercentage(percentage);
+				});				   
+		   }		   
+	   },
+	   gettingPercentageForItem : function(i)
+	   {
+			return data.exp[i].percentage;
+	   },
 	   getindiVidualExpense:function(i)
 	   {
 		   return data.exp[i].val;
@@ -193,19 +212,27 @@ const appController = (function(uiControllerGet, budgetControllerGet) {
 					const totalBudgetValue = budgetControllerGet.calculateTotalBudget();
 					uiControllerGet.showTotalBudget(totalBudgetValue);
 
-					const totalpercentage = budgetControllerGet.getcalculateTotalPercentage();
+					const totalpercentage = budgetControllerGet.getcalculateTotalPercentage();					
 					uiControllerGet.showTotalPercentage(totalpercentage);
-					getindividualPercentage(incomeTotal);
-		}
-		const getindividualPercentage = function(incomeTotal)
-		{
-			
-			const allexpenseItem = document.querySelectorAll(uiControllerGet.uiComponents().itemPercentage);
 
-			if(allexpenseItem.length > 0 && incomeTotal > 0 )
+					budgetControllerGet.settingPercentageForItems();
+					getAllPercentage();
+		}
+		
+		const getAllPercentage = function()
+		{			
+			const allexpenseItemsUI = document.querySelectorAll(uiControllerGet.uiComponents().itemPercentage);
+
+			if(allexpenseItemsUI.length > 0)
 			{
-				allexpenseItem.forEach(function(item,i){
-					const percentage =  budgetControllerGet.getindiVidualExpense(i) * 100/incomeTotal ;
+				const functionalArgument = function(allitem,callback){
+					for(var i = 0 ; i< allitem.length ; i++)
+					{
+						callback(allitem[i],i);
+					}
+				}
+				functionalArgument(allexpenseItemsUI,function(item,index){
+					percentage = budgetControllerGet.gettingPercentageForItem(index);
 					item.innerHTML = percentage >100 ? "" : percentage.toFixed(2) + "%";
 				});
 			}

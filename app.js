@@ -9,7 +9,10 @@ const uiController = (function() {
 		incContainer: '#income-container tbody',
         expContainer: '#expense-container tbody',
         incTotalContainer:".total-income-amount",
-        expTotalContainer:".total-expense-amount"
+		expTotalContainer:".total-expense-amount",
+		totalBudget : ".total-budget-value",
+		totalPercentage : ".total-budget-percentage",
+		itemPercentage : ".item-percentage"
 	};
 
 	//Return Object with all necessory arguments
@@ -17,7 +20,10 @@ const uiController = (function() {
 		uiComponents: function() {
 			return uiComponentsObj;
 		},
-
+		initialvalues:function()
+		{
+			document.querySelector(uiComponentsObj.totalBudget).innerHTML = "0$";
+		},
 		getValues: function() {
 			return {
 				type: document.querySelector(uiComponentsObj.type).value,
@@ -31,11 +37,11 @@ const uiController = (function() {
 			if (type === 'inc') {
 				container = document.querySelector(uiComponentsObj.incContainer);
 				item = document.createElement('tr');
-				item.innerHTML = `<td>${val}</td><td>${desc}</td><td><i class="fa fa-remove" data-id=${id}></i></td>`;
+				item.innerHTML = `<td>${val}$</td><td>${desc}</td><td><i class="fa fa-remove" data-id=${id}></i></td>`;
 			} else if (type === 'exp') {
 				container = document.querySelector(uiComponentsObj.expContainer);
 				item = document.createElement('tr');
-				item.innerHTML = `<td>${val}</td><td>${desc}</td><td><i class="fa fa-remove" data-id=${id}></i></td>`;
+				item.innerHTML = `<td>${val}$</td><td>${desc}</td><td><i class="fa fa-remove" data-id=${id}></i> <span class='item-percentage'></span></td>`;
 			}
 			container.insertAdjacentElement('beforeend', item);
 		},
@@ -51,12 +57,20 @@ const uiController = (function() {
         },
         showTotal:function(type,total)
         {
-                document.querySelector(uiComponentsObj[`${type}TotalContainer`]).innerHTML = "$"+total;
-        },
+                document.querySelector(uiComponentsObj[`${type}TotalContainer`]).innerHTML = total + "$";
+		},
+		showTotalBudget:function(val)
+		{
+			document.querySelector(uiComponentsObj['totalBudget']).innerHTML = val+"$";
+		},
+		showTotalPercentage:function(val)
+		{
+			document.querySelector(uiComponentsObj['totalPercentage']).innerHTML = val;
+		},
         removeItem:function(type,element)
         {
             element.parentElement.parentElement.remove();
-        }
+		}
 	};
 })();
 
@@ -85,7 +99,7 @@ const budgetController = (function() {
 		this.val = val;
 		this.desc = desc;
 	};
-
+	
 	return {
 		addItem: function({ type, value, description }) {
 			let newDataObj;
@@ -105,9 +119,30 @@ const budgetController = (function() {
        {
             let sum;
             sum = 0;
-            data[type].forEach((item) => {return sum += item.val} );
+			data[type].forEach((item) => {return sum += item.val} );
+			data['total'+type] = sum;
             return sum;
-       },
+	   },
+	   calculateTotalBudget: function()
+	   {
+			return data.totalinc- data.totalexp;
+	   },
+	   getcalculateTotalPercentage:function()
+	   {
+		if(data.totalinc > 0) 
+		{
+			const cal = (((data.totalinc - data.totalexp ) * 100 / data.totalinc)).toFixed(2);
+			return cal >= 0 ? `( ${cal} % )`: "";
+		}
+		else{
+			return "";
+		}
+	   },
+	   
+	   getindiVidualExpense:function(i)
+	   {
+		   return data.exp[i].val;
+	   },
        removeItem:function(type,id)
        {     
            const indexToRemove = data[type].findIndex(function(item){return item.id === Number(id)});
@@ -150,10 +185,31 @@ const appController = (function(uiControllerGet, budgetControllerGet) {
         const updateTotals = function()
         {
                     const incomeTotal = budgetControllerGet.calculatetotal("inc");
-                    uiControllerGet.showTotal("inc" , incomeTotal);
+					uiControllerGet.showTotal("inc" , incomeTotal);
+					
                     const expenseTotal = budgetControllerGet.calculatetotal("exp");            
-                    uiControllerGet.showTotal("exp", expenseTotal);
-        }
+					uiControllerGet.showTotal("exp", expenseTotal);
+
+					const totalBudgetValue = budgetControllerGet.calculateTotalBudget();
+					uiControllerGet.showTotalBudget(totalBudgetValue);
+
+					const totalpercentage = budgetControllerGet.getcalculateTotalPercentage();
+					uiControllerGet.showTotalPercentage(totalpercentage);
+					getindividualPercentage(incomeTotal);
+		}
+		const getindividualPercentage = function(incomeTotal)
+		{
+			
+			const allexpenseItem = document.querySelectorAll(uiControllerGet.uiComponents().itemPercentage);
+
+			if(allexpenseItem.length > 0 && incomeTotal > 0 )
+			{
+				allexpenseItem.forEach(function(item,i){
+					const percentage =  budgetControllerGet.getindiVidualExpense(i) * 100/incomeTotal ;
+					item.innerHTML = percentage >100 ? "" : percentage + "%";
+				})	
+			}
+		}
 
     const removeIncome = function(e)
     {     
@@ -182,11 +238,11 @@ const appController = (function(uiControllerGet, budgetControllerGet) {
     }
 
 	const setInitialCode = function() {
+		uiControllerGet.initialvalues();
 		const allUiComponents = uiControllerGet.uiComponents();
         document.querySelector(allUiComponents.addBtn).addEventListener('click', saveData);
         document.querySelector(allUiComponents.incContainer).addEventListener("click",removeIncome)
-        document.querySelector(allUiComponents.expContainer).addEventListener("click",removeExpense)
-        
+        document.querySelector(allUiComponents.expContainer).addEventListener("click",removeExpense)        
 	};
 	return {
 		init: function() {

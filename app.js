@@ -206,7 +206,7 @@ const appController = (function(uiControllerGet, budgetControllerGet) {
 			{
 				allexpenseItem.forEach(function(item,i){
 					const percentage =  budgetControllerGet.getindiVidualExpense(i) * 100/incomeTotal ;
-					item.innerHTML = percentage >100 ? "" : percentage + "%";
+					item.innerHTML = percentage >100 ? "" : percentage.toFixed(2) + "%";
 				});
 			}
 		}
